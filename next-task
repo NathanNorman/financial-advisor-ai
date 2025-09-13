@@ -1,3 +1,4 @@
 #!/bin/bash
 cd "$(dirname "$0")"
-python3 coordinator.py next-task "$@"
+# Call coordinator.py without arguments to get the next task
+python3 coordinator.py
