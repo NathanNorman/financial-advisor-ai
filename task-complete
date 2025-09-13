@@ -1,3 +1,10 @@
 #!/bin/bash
 cd "$(dirname "$0")"
-python3 coordinator.py task-complete "$@"
+# Mark a task as completed
+# Usage: ./task-complete <issue_number>
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <issue_number>"
+    echo "Example: $0 1"
+    exit 1
+fi
+python3 coordinator.py release "$1" completed
