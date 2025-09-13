@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Multi-Agent Coordination Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 640px) {
+            body {
+                padding: 5px;
+            }
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        @media (min-width: 768px) {
+            header {
+                padding: 30px;
+                margin-bottom: 30px;
+            }
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+            .subtitle {
+                font-size: 1.1rem;
+            }
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        @media (min-width: 640px) {
+            .dashboard {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .dashboard {
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        @media (min-width: 768px) {
+            .card {
+                padding: 25px;
+            }
+            .card:hover {
+                transform: translateY(-5px);
+            }
+        }
+
+        .card h2 {
+            color: #4a5568;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        @media (min-width: 768px) {
+            .card h2 {
+                font-size: 1.3rem;
+                margin-bottom: 20px;
+            }
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        @media (min-width: 768px) {
+            .stat-number {
+                font-size: 3rem;
+            }
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .issue-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .issue-card {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #4a5568;
+            transition: all 0.3s ease;
+        }
+        
+        @media (min-width: 768px) {
+            .issue-card {
+                padding: 15px;
+            }
+        }
+
+        .issue-card.available {
+            border-left-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .issue-card.inprogress {
+            border-left-color: #ed8936;
+            background: #fffdf7;
+        }
+
+        .issue-card.blocked {
+            border-left-color: #cbd5e0;
+            opacity: 0.7;
+        }
+
+        .issue-card.completed {
+            border-left-color: #9f7aea;
+            background: #faf5ff;
+        }
+
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .issue-number {
+            font-weight: bold;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+
+        .issue-status {
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        @media (min-width: 768px) {
+            .issue-status {
+                padding: 4px 12px;
+                font-size: 0.85rem;
+            }
+        }
+
+        .status-available {
+            background: #48bb78;
+            color: white;
+        }
+
+        .status-in-progress {
+            background: #ed8936;
+            color: white;
+        }
+
+        .status-blocked {
+            background: #cbd5e0;
+            color: #4a5568;
+        }
+
+        .status-completed {
+            background: #9f7aea;
+            color: white;
+        }
+
+        .issue-title {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .issue-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .agent-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .agent-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .agent-id {
+            font-family: monospace;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .agent-task {
+            color: #718096;
+        }
+
+        .agent-working {
+            color: #48bb78;
+            font-weight: 600;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        @media (min-width: 640px) {
+            .refresh-btn {
+                width: auto;
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        @media (max-width: 639px) {
+            .refresh-btn:hover {
+                transform: none;
+            }
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        @media (min-width: 640px) {
+            .control-panel {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                padding: 20px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .control-panel {
+                padding: 25px;
+                margin-bottom: 30px;
+                gap: 15px;
+            }
+        }
+
+        .terminal-output {
+            background: #1a202c;
+            color: #68d391;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 0.8rem;
+        }
+        
+        @media (min-width: 768px) {
+            .terminal-output {
+                padding: 20px;
+                min-height: 200px;
+                max-height: 400px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .dependency-graph {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .dep-arrow {
+            color: #cbd5e0;
+            margin: 0 10px;
+        }
+        
+        .task-status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .task-status-grid {
+                gap: 20px;
+            }
+        }
+        
+        .status-item {
+            text-align: center;
+        }
+        
+        .stat-number.status-available {
+            color: #48bb78;
+            font-size: 1.8rem;
+        }
+        
+        .stat-number.status-progress {
+            color: #ed8936;
+            font-size: 1.8rem;
+        }
+        
+        .stat-number.status-blocked {
+            color: #cbd5e0;
+            font-size: 1.8rem;
+        }
+        
+        .stat-number.status-done {
+            color: #9f7aea;
+            font-size: 1.8rem;
+        }
+        
+        @media (min-width: 768px) {
+            .stat-number.status-available,
+            .stat-number.status-progress,
+            .stat-number.status-blocked,
+            .stat-number.status-done {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Multi-Agent Coordination Dashboard</h1>
+            <div class="subtitle">Financial Clarity Project - Real-time Task Management</div>
+        </header>
+
+        <div class="control-panel">
+            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Status</button>
+            <button class="refresh-btn" onclick="runCommand('task-status')">📊 Full Status</button>
+            <button class="refresh-btn" onclick="runCommand('next-task')">➕ Claim Task</button>
+            <button class="refresh-btn" onclick="runCommand('task-release')">🔓 Release Task</button>
+            <button class="refresh-btn" onclick="runCommand('task-complete')">✅ Complete Task</button>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2>📊 Overall Progress</h2>
+                <div class="stat-number" id="progress-percent">0%</div>
+                <div class="stat-label">Complete</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-bar" style="width: 0%">
+                        <span id="progress-text">0 / 12</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>👥 Active Agents</h2>
+                <div class="stat-number" id="agent-count">0</div>
+                <div class="stat-label">Agents Working</div>
+                <div class="agent-list" id="agent-list">
+                    <div class="loading">Loading agents...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📈 Task Status</h2>
+                <div class="task-status-grid">
+                    <div class="status-item">
+                        <div class="stat-number status-available" id="available-count">0</div>
+                        <div class="stat-label">Available</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="stat-number status-progress" id="progress-count">0</div>
+                        <div class="stat-label">In Progress</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="stat-number status-blocked" id="blocked-count">0</div>
+                        <div class="stat-label">Blocked</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="stat-number status-done" id="completed-count">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 All Issues</h2>
+            <div class="issue-grid" id="issue-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading issues...
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🖥️ Terminal Output</h2>
+            <div class="terminal-output" id="terminal-output">
+Ready. Click a command button above to see output...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data for demonstration
+        const mockData = {
+            agents: [
+                { id: '2d783198', task: 1, status: 'working' },
+                { id: 'f424e99e', task: null, status: 'idle' },
+                { id: '3f96f362', task: null, status: 'idle' }
+            ],
+            issues: [
+                { number: 1, title: 'Data Processing Pipeline', status: 'in-progress', agent: '2d783198', dependencies: [] },
+                { number: 2, title: 'Main Dashboard', status: 'blocked', dependencies: [1] },
+                { number: 3, title: 'Cash Flow Simulator', status: 'blocked', dependencies: [1] },
+                { number: 4, title: 'Spending Patterns', status: 'blocked', dependencies: [1] },
+                { number: 5, title: 'What-If Calculator', status: 'blocked', dependencies: [1] },
+                { number: 6, title: 'Trend Analysis', status: 'blocked', dependencies: [1] },
+                { number: 7, title: 'LLM Export', status: 'blocked', dependencies: [2] },
+                { number: 8, title: 'Recurring Expenses', status: 'blocked', dependencies: [1] },
+                { number: 9, title: 'Mobile Design', status: 'blocked', dependencies: [2,3,4,5,6,8] },
+                { number: 10, title: 'Print Reports', status: 'blocked', dependencies: [2,3,4,5,6,8] },
+                { number: 11, title: 'Data Validation', status: 'blocked', dependencies: [1] },
+                { number: 12, title: 'Documentation', status: 'blocked', dependencies: [7] }
+            ]
+        };
+
+        function updateDashboard(data) {
+            // Update progress
+            const completed = data.issues.filter(i => i.status === 'completed').length;
+            const total = data.issues.length;
+            const percent = Math.round((completed / total) * 100);
+            
+            document.getElementById('progress-percent').textContent = `${percent}%`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            document.getElementById('progress-text').textContent = `${completed} / ${total}`;
+            
+            // Update counts
+            const available = data.issues.filter(i => i.status === 'available').length;
+            const inProgress = data.issues.filter(i => i.status === 'in-progress').length;
+            const blocked = data.issues.filter(i => i.status === 'blocked').length;
+            
+            document.getElementById('available-count').textContent = available;
+            document.getElementById('progress-count').textContent = inProgress;
+            document.getElementById('blocked-count').textContent = blocked;
+            document.getElementById('completed-count').textContent = completed;
+            
+            // Update agents
+            const workingAgents = data.agents.filter(a => a.status === 'working').length;
+            document.getElementById('agent-count').textContent = workingAgents;
+            
+            const agentListHTML = data.agents.map(agent => `
+                <div class="agent-item">
+                    <span class="agent-id">Agent ${agent.id}</span>
+                    <span class="${agent.status === 'working' ? 'agent-working' : 'agent-task'}">
+                        ${agent.task ? `Working on Issue #${agent.task}` : 'Idle'}
+                    </span>
+                </div>
+            `).join('');
+            document.getElementById('agent-list').innerHTML = agentListHTML;
+            
+            // Update issues
+            const issueGridHTML = data.issues.map(issue => {
+                const statusClass = issue.status.replace('-', '');
+                const statusDisplay = issue.status.replace('-', ' ');
+                return `
+                <div class="issue-card ${statusClass}">
+                    <div class="issue-header">
+                        <span class="issue-number">Issue #${issue.number}</span>
+                        <span class="issue-status status-${statusClass}">
+                            ${statusDisplay}
+                        </span>
+                    </div>
+                    <div class="issue-title">${issue.title}</div>
+                    <div class="issue-meta">
+                        ${issue.agent ? `<span>👤 ${issue.agent}</span>` : ''}
+                        ${issue.dependencies.length > 0 ? 
+                            `<span>🔗 Deps: ${issue.dependencies.join(', ')}</span>` : 
+                            '<span>✅ Ready</span>'}
+                    </div>
+                </div>
+            `}).join('');
+            document.getElementById('issue-grid').innerHTML = issueGridHTML;
+        }
+
+        function refreshData() {
+            // In a real implementation, this would fetch from the Python backend
+            updateDashboard(mockData);
+            document.getElementById('terminal-output').textContent = 
+`[${new Date().toLocaleTimeString()}] Refreshing status...
+✅ Data updated successfully
+📊 Found ${mockData.agents.length} agents
+📋 Tracking ${mockData.issues.length} issues`;
+        }
+
+        function runCommand(command) {
+            document.getElementById('terminal-output').textContent = 
+`[${new Date().toLocaleTimeString()}] Running: ./${command}
+
+🤖 Agent ID: ${mockData.agents[0].id}
+🔍 Executing ${command}...
+
+${getCommandOutput(command)}`;
+        }
+
+        function getCommandOutput(command) {
+            const outputs = {
+                'task-status': `📊 TASK COORDINATION STATUS
+============================================================
+
+👥 ACTIVE AGENTS: ${mockData.agents.length}
+📋 ISSUE STATUS:
+  ✅ Completed: 0 issues
+  🔒 In Progress: 1 issue
+  📂 Available: 0 issues
+  ⏳ Blocked: 11 issues
+
+🔒 LOCKED ISSUES:
+  • Issue #1: Data Processing Pipeline
+    Agent: 2d783198, Locked: 5 mins ago`,
+                
+                'next-task': `❌ No available tasks at the moment.
+
+All tasks are currently blocked waiting for Issue #1 to complete.`,
+                
+                'task-release': `🔄 Releasing Issue #1...
+✅ Issue #1 has been released!
+📊 Task is now available for other agents.`,
+                
+                'task-complete': `✅ Marking Issue #1 as COMPLETED
+🎉 Issue #1 marked as completed!
+📊 Issues #2-8 are now available!`
+            };
+            
+            return outputs[command] || 'Command output...';
+        }
+
+        // Initial load
+        refreshData();
+        
+        // Auto-refresh every 10 seconds
+        setInterval(refreshData, 10000);
+    </script>
+</body>
+</html>

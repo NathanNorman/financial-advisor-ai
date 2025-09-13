@@ -1,0 +1,30 @@
+{
+  "github": {
+    "owner": "NathanNorman",
+    "repo": "financial-advisor-ai"
+  },
+  "coordination": {
+    "max_parallel_agents": 5,
+    "lock_timeout_minutes": 30,
+    "stale_agent_timeout_minutes": 60,
+    "auto_cleanup": true
+  },
+  "dependencies": {
+    "1": [],
+    "2": [1],
+    "3": [1],
+    "4": [1],
+    "5": [1, 4],
+    "6": [1]
+  },
+  "priorities": {
+    "high": ["bug", "security", "critical", "setup"],
+    "medium": ["enhancement", "feature", "core", "dashboard"],
+    "low": ["documentation", "style", "refactor"]
+  },
+  "workflow": {
+    "require_tests": true,
+    "require_review": false,
+    "auto_assign": true
+  }
+}
