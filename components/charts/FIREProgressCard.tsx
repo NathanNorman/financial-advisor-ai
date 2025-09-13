@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, Title, Text, ProgressBar, Badge, Metric, AreaChart } from '@tremor/react'
-import { FireIcon, TrendingUpIcon } from '@heroicons/react/24/outline'
+import { FireIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
 import { mockFIREMetrics } from '@/lib/mock-data'
 import { useState } from 'react'
 
@@ -115,7 +115,7 @@ export default function FIREProgressCard() {
         <div className="grid grid-cols-2 gap-4">
           <Card decoration="left" decorationColor="orange">
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUpIcon className="w-5 h-5 text-orange-600" />
+              <ArrowTrendingUpIcon className="w-5 h-5 text-orange-600" />
               <Text className="font-semibold">4% Rule Income</Text>
             </div>
             <Metric className="text-xl">${monthlyNeeded.toFixed(0)}/mo</Metric>

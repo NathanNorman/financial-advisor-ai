@@ -6,7 +6,7 @@ import {
   ChartBarIcon, 
   FireIcon, 
   ShieldCheckIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   CalculatorIcon
 } from '@heroicons/react/24/outline'
 import CashFlowChart from '@/components/charts/CashFlowChart'
@@ -67,7 +67,7 @@ export default function DashboardPage() {
                 {monthlyNetFlow > 0 ? '+' : ''}{monthlyNetFlow.toLocaleString()}
               </Metric>
             </div>
-            <TrendingUpIcon className="w-8 h-8 text-blue-600" />
+            <ArrowTrendingUpIcon className="w-8 h-8 text-blue-600" />
           </Flex>
         </Card>
 

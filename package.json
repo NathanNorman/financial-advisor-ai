@@ -12,6 +12,7 @@
     "test:ci": "jest"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.19",
     "@heroicons/react": "^2.0.18",
     "@tremor/react": "^3.17.4",
     "@types/node": "20.14.9",
